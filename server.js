@@ -184,7 +184,7 @@ router.route('/bitpay/ipn')
 	});
 
 // Stripe Charge
-router.route('/strip/charge')
+router.route('/stripe/charge')
 	.post (function(req, res) {
 		console.log(JSON.stringify(req.body));
 	});
@@ -193,6 +193,12 @@ router.route('/strip/charge')
 // all of our routes will be prefixed with /api
 app.use('/api/v1', router);
 app.use('/static', express.static('static'));
+
+// ERROR HANDLER
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
 // START THE SERVER
 // =============================================================================
