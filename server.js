@@ -49,7 +49,7 @@ function sha1(value) {
 
 // Fetch Membership fees and cache them
 var membership_types = {};
-crmAPI.get ('MembershipType',{is_active: 1, return:'name,minimum_fee'},
+crmAPI.get ('MembershipType',{is_active: 1, return:'name,minimum_fee,description'},
 	function (result) {
 		for (var i in result.values) {
 			var mt = result.values[i]
@@ -107,8 +107,10 @@ function get_member_data(member_id, callback) {
 						for (var i in result.values) {
 							var val = result.values[i];
 
-							// add info from membership_types e.g. price
+							// add info from membership_types e.g. price and section name
 							val.minimum_fee = membership_types[val.membership_name].minimum_fee;
+							val.description = membership_types[val.membership_name].description;
+
 							total_fee = total_fee + parseInt(val.minimum_fee);
 
 							// TODO, this is a hackish selection of section levels (PPS, PPXX and PPCITYNAME)
