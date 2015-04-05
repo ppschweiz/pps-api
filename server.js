@@ -95,11 +95,13 @@ router.route('/member/:auth_key/:member_id')
 					console.log(contact.id +": "+contact.display_name+ " "+contact.email+ " "+ contact.phone);
 					crmAPI.get ('membership',{contact_id: contact.contact_id},
 						function (result) {
+							var total_fee = 0;
 							for (var i in result.values) {
 								var val = result.values[i];
 
 								// add info from membership_types e.g. price
 								val.minimum_fee = membership_types[val.membership_name].minimum_fee;
+								total_fee = total_fee + parseInt(val.minimum_fee);
 
 								// TODO, this is a hackish selection of section levels (PPS, PPXX and PPCITYNAME)
 								if(val.membership_name.length == 3)
@@ -109,7 +111,7 @@ router.route('/member/:auth_key/:member_id')
 								else
 									ret.level3 = val
 							}
-							ret.minimum_fee = parseInt(ret.level1.minimum_fee) + parseInt(ret.level2.minimum_fee) + parseInt(ret.level3.minimum_fee);
+							ret.minimum_fee = total_fee;
 							res.json( ret );   
 						}
 					);
