@@ -32,7 +32,7 @@ function prettyPhone(value) {
 	if (value) try {
 		var phoneNumber = phoneUtil.parse(value, 'CH');
 		if (phoneUtil.isValidNumber(phoneNumber))
-			return phoneUtil.format(phoneNumber, phone.PhoneNumberFormat.INTERNATIONAL);
+			return phoneUtil.format(phoneNumber, phone.PhoneNumberFormat.E164);
 	} catch(err) {
 		// return undefined
 	}
@@ -394,11 +394,11 @@ function add_or_update_object(object, entry) {
 
 		// main phone_type_id=1
 		var main_phone = map_to_object('Phone', entry, 1);
-		_crud('Phone', {'contact_id':contact_id, 'location_type_id': 3, 'phone_type_id':'1'}, main_phone.phone, main_phone);
+		_crud('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'1'}, main_phone.phone, main_phone);
 
 		// mobile phone_type_id=2
 		var mobile_phone = map_to_object('Phone', entry, 2);
-		_crud('Phone', {'contact_id':contact_id, 'location_type_id': 3, 'phone_type_id':'2'}, mobile_phone.phone, mobile_phone);
+		_crud('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'2'}, mobile_phone.phone, mobile_phone);
 
 		// Add membership definition // PPS
 		var membership = map_to_object('Membership', entry, 0);
