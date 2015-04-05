@@ -179,13 +179,14 @@ router.route('/letterman/:auth_key/:member_id/:view')
 // Bitpay IPN
 router.route('/bitpay/ipn')
 	.post (function(req, res) {
-		console.log(JSON.stringify(req.params));
+		console.log(JSON.stringify(req.body));
+		res.send("OK"); // make bitpay happy for now
 	});
 
 // Stripe Charge
 router.route('/strip/charge')
 	.post (function(req, res) {
-		console.log(JSON.stringify(req.params));
+		console.log(JSON.stringify(req.body));
 	});
 
 // REGISTER OUR ROUTES -------------------------------
