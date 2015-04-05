@@ -43,6 +43,7 @@ function prettyPhone(value) {
 map_preferred_language = {'de': 'de_CH', 'fr': 'fr_FR', 'en': 'en_GB', 'it': 'it_IT'}
 map_preferred_communication_method = {'0': '1', '1': '2'}
 map_gender = {'0':'', '1': '2', '2': '1', '3': ''}
+map_gender_prefix = {'0':'', '1': '3', '2': '1', '3': ''} // CiviCRM: 1= Mrs, 2=Ms, 3=Mr, 4=Dr
 
 fieldmap_contact_org = { 
 	'organization_name':'displayName',
@@ -78,15 +79,24 @@ fieldmap_contact_person = {
 			return "1";
 		},
 	},
-	'ppsGender': {
-		key: 'gender_id',
-		transform: function(value, objFrom, objTo) {
-                        return map_gender[value];
-                },
-		default: function(objFrom, objTo) {
-			return undefined;
-		},
-	},
+	'ppsGender': [{
+			key: 'gender_id',
+			transform: function(value, objFrom, objTo) {
+				return map_gender[value];
+			},
+			default: function(objFrom, objTo) {
+				return undefined;
+			},
+		},{
+			key: 'prefix_id',
+			transform: function(value, objFrom, objTo) {
+				return map_gender_prefix[value];
+			},
+			default: function(objFrom, objTo) {
+				return undefined;
+			},
+		}
+	],
 	'sn': {
 		key: 'last_name',
 		default: function(objFrom, objTo) {
