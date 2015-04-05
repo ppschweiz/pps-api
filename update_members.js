@@ -60,7 +60,18 @@ fieldmap_contact_person = {
 			return "user"+objFrom.uniqueIdentifier;
 		},
 	},
-	'uid': 'nick_name', 
+	'uid': {
+		key: 'nick_name', 
+		transform: function(value, objFrom, objTo) {
+			if (value && value.constructor == Array)
+				return value[0]
+			else
+				return value;
+		},
+		default: function(objFrom, objTo) {
+			return undefined;
+		},
+	},
 	'preferredLanguage': { 
 		key: 'preferred_language', 
 		transform: function(value, objFrom, objTo) {
