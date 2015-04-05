@@ -9,6 +9,7 @@ var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var assert     = require('assert');
 var crypto = require('crypto');
+var dots = require("dot").process({path: "./views", templateSettings: {strip: false}});
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -34,6 +35,9 @@ var secrets = process.env.PPSAPI_SECRETS.split(',');
 // sha1(secret + ":" + f1 + "/" + leftover).substring(0,20)
 // e.g. http://localhost:8080/members/hash/blabla would result in
 // sha1(secret:members/blabla).substring(0,20) only half of the hash is used
+
+var paylink_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch/";
+var paylink_secret = process.env.PPSAPI_PAYSECRET;
 
 function sha1(value) {
 	var shasum = crypto.createHash('sha1');
@@ -83,45 +87,78 @@ router.use('/:f1/:auth_key/*',
 		}
 });
 
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function get_member_data(member_id, callback) {
+	crmAPI.get ('contact',{contact_type:'Individual', external_identifier: member_id, return:'preferred_communication_method,email_greeting_display,postal_greeting_display,display_name,first_name,last_name,email,phone,street_address,postal_code,city,country,gender_id'},
+		function (result) {
+			var ret={};
+			if (result.values && result.values.length==1) {
+				var contact = result.values[0];
+				ret = contact;
+				console.log(contact.id +": "+contact.display_name+ " "+contact.email+ " "+ contact.phone);
+				crmAPI.get ('membership',{contact_id: contact.contact_id},
+					function (result) {
+						var total_fee = 0;
+						for (var i in result.values) {
+							var val = result.values[i];
+
+							// add info from membership_types e.g. price
+							val.minimum_fee = membership_types[val.membership_name].minimum_fee;
+							total_fee = total_fee + parseInt(val.minimum_fee);
+
+							// TODO, this is a hackish selection of section levels (PPS, PPXX and PPCITYNAME)
+							if(val.membership_name.length == 3)
+								ret.level1 = val
+							else if(val.membership_name.length == 4)
+								ret.level2 = val
+							else
+								ret.level3 = val
+						}
+						ret.minimum_fee = total_fee.toFixed(2);
+						// construct invoice number and ESR
+						ret.invoicenr = "14" + pad(ret.external_identifier, 6, 0);
+						ret.esrreference = ret.invoicenr;
+						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20150";
+						ret.paylink = paylink_base + "pay/" + sha1(paylink_secret + ":pay/" + ret.external_identifier).substring(0,20) + "/" + ret.external_identifier;
+						if (callback)
+							callback(ret);
+					}
+				);
+			} else {
+				if (callback)
+					callback(ret);
+			}
+		}
+	);
+}
+
 // more routes for our API will happen here
 router.route('/member/:auth_key/:member_id')
 	.get (function(req, res) {
-		crmAPI.get ('contact',{contact_type:'Individual', external_identifier: req.params.member_id, return:'preferred_communication_method,email_greeting_display,postal_greeting_display,display_name,first_name,last_name,email,phone,street_address,postal_code,city,country'},
-			function (result) {
-				var ret={};
-				if (result.values && result.values.length==1) {
-					var contact = result.values[0];
-					ret.contact = contact;
-					console.log(contact.id +": "+contact.display_name+ " "+contact.email+ " "+ contact.phone);
-					crmAPI.get ('membership',{contact_id: contact.contact_id},
-						function (result) {
-							var total_fee = 0;
-							for (var i in result.values) {
-								var val = result.values[i];
-
-								// add info from membership_types e.g. price
-								val.minimum_fee = membership_types[val.membership_name].minimum_fee;
-								total_fee = total_fee + parseInt(val.minimum_fee);
-
-								// TODO, this is a hackish selection of section levels (PPS, PPXX and PPCITYNAME)
-								if(val.membership_name.length == 3)
-									ret.level1 = val
-								else if(val.membership_name.length == 4)
-									ret.level2 = val
-								else
-									ret.level3 = val
-							}
-							ret.minimum_fee = total_fee;
-							res.json( ret );   
-						}
-					);
-				} else {
-					res.json( {} );   
-				}
-			}
-		);
+		get_member_data(req.params.member_id, function(ret) {
+			res.json( ret );
+		});
 	}
 );
+
+// Letterman API
+router.route('/letterman/:auth_key/:member_id/:view')
+	.get (function(req, res) {
+		get_member_data(req.params.member_id, function(ret) {
+			var dots_view = dots[req.params.view];
+			if (dots_view) {
+				var out = dots_view(ret);
+				res.send(out);
+			} else {
+				res.send("Invalid view");
+			}
+		});
+	});
 
 // Bitpay IPN
 router.route('/bitpay/ipn')

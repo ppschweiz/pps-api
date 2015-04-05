@@ -1,0 +1,189 @@
+\documentclass[ppsletter,fontsize=11pt,foldmarks=false ]{scrlttr2}
+\usepackage[margin=10pt,font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{esr}
+
+\makeatletter
+\@setplength{toaddrvpos}{4.5cm}
+\@setplength{toaddrhpos}{12cm}
+\KOMAoptions{foldmarks=off}
+
+\setkomavar{memberid}{}
+\setkomavar{membernick}{}
+\setkomavar{memberemail}{}
+
+\setkomavar{partei}{Stefan Thöni}
+\setkomavar{departement}{Co-Präsident}
+\setkomavar{fromname}{}
+\setkomavar{fromstreet}{Piratenpartei Schweiz}
+\setkomavar{fromcity}{3000 Bern}
+\setkomavar{fromemail}{info@piratenpartei.ch}
+\setkomavar{fromurl}{www.piratenpartei.ch}
+\setkomavar{backaddress}{}
+\setkomavar{date}{5.~April~2015}
+
+\setkomavar{signature}{\includegraphics[width=3cm]{sig.png} \\ Stefan Thöni \\ Co-Präsident \\ Piratenpartei Schweiz}
+
+% VARIABLES START
+\newcommand{\surname}{{{=it.last_name}}}
+\newcommand{\givenname}{{{=it.first_name}}}
+% Anrede informell? Lieber/Liebe?
+{{? (it.gender_id == 2)}}
+\newcommand{\salut}{Lieber~\givenname}
+{{?? false }}
+\newcommand{\salut}{Liebe~\givenname}
+{{?}}
+\newcommand{\location}{{{=it.city}}}
+\newcommand{\country}{{{=it.country}}}
+\newcommand{\postalcode}{{{=it.postal_code}}}
+\newcommand{\street}{{{=it.street_address}}}
+\newcommand{\amountpps}{{{=it.level1.minimum_fee}}}
+\newcommand{\amountsection}{{{=it.level2.minimum_fee}}}
+\newcommand{\sectionname}{{{=it.level2.membership_name}}}
+\newcommand{\amountsum}{{{=it.minimum_fee}}}
+\newcommand{\reference}{{{=it.esrreference}}}
+\newcommand{\memberid}{{{=it.external_identifier}}}
+\newcommand{\invoicenr}{{{=it.invoicenr}}}
+
+\esrEinzahlungFuer{Postfinance\\3030 Bern}
+\esrZugunstenVon{Piratenpartei Schweiz\\3000 Bern}
+\esrKonto{01-84038-2}
+\esrPrefix{{{=it.esrprefix}}}
+% VARIABLES END
+
+\setkomavar{subject}{Mitgliederbeitrag 2015}
+
+\begin{document}
+ 
+\selectlanguage{ngerman}
+
+\ifstr{\country}{Schweiz}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{10cm}
+
+\opening{\salut}
+
+Das 2015 ist Wahljahr und die Piratenpartei und ihre Sektionen bereiten sich auf den Nationalratswahlkampf vor. Dort ein gutes Resultat zu erzielen oder vielleicht sogar einen Sitz zu erringen ist wichtig, damit unsere Anliegen in den nächsten vier Jahren mehr Gehör finden.
+
+Die Ideen der Piraten sind aktueller denn je:
+\begin{itemize}
+\item Das Überwachungsgesetz BÜPF hat den Ständerat nahezu unverändert passiert und droht die Vorratsdatenspeicherung von Telefon- und Internetverbindungen auf 12 Monate auszudehnen und den Staatstrojaner einzuführen.
+\item Das Nachrichtendienstgesetz NDG ermächtigt den Schüffeldienst, unsere Internetverbindungen massenhaft mitzuschneiden und uns alle ohne Verdacht abzuhören.
+\item Die Netzneutralität ist im Nationalrat klanglos untergegangen. Nun droht ein Internet der zwei Geschwindigkeiten, wo nur noch Angebote auf der teuren Überholspur schnell angezeigt werden.
+\end{itemize}
+
+Um den Wahlkampf mit Plakaten, Flyer und Standaktionen finanzieren zu können, brauchen wir Deinen Beitrag. Zudem planen wir eine Sekretariatsassizenz in Teilzeit anzustellen, um den Vorstand von administrativen Arbeiten zu entlasten, so dass wir mehr Zeit für politische Aktionen, Medienmitteilungen, Vernehmlassungsantworten und Petitionen aufwenden können.
+
+\closing{Piratige Grüsse}
+
+\end{letter}
+
+\newpage
+
+\setkomavar{subject}{Rechnung {\invoicenr}}
+\setkomavar{fromemail}{finance@piratenpartei.ch}
+
+\ifstr{\country}{Schweiz}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{10cm}
+
+\opening{\salut}
+
+\ifstr{\country}{Schweiz}{%
+    \newcommand{\currency}{CHF}
+}{%
+    \newcommand{\currency}{EUR}
+}
+
+Der Mitgliederbetrag setzt sich dieses Jahr wie folgt zusammen:
+
+\ifstr{\sectionname}{\empty}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Mitgliedschaft 2015}    &               & \textbf{Betrag}       \\
+Piratenpartei Schweiz           & \currency     & \amountpps            \\
+\hline
+Total                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+Die Piratenpartei Schweiz dankt Dir für deine Unterstützung!
+
+}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Mitgliedschaft 2015}    &               & \textbf{Betrag}       \\
+Piratenpartei Schweiz           & \currency     & \amountpps            \\
+\sectionname                    & \currency     & \amountsection        \\
+\hline
+Total                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+Deine Sektion und die Piratenpartei Schweiz danken Dir für deine Unterstützung!
+
+}
+
+\ifstr{\country}{Schweiz}{%
+
+\esrEinbezahltVon{\givenname~\surname \\ \street \\ \postalcode~\location}
+\expandafter\esrBetrag\expandafter{\amountsum}
+\expandafter\esrReferenznummer\expandafter{\reference}
+\esrPrint
+
+}{%
+
+\vspace{1cm}
+Betrag überweisen an:
+
+Piratenpartei Schweiz \\
+3000 Bern
+
+IBAN: CH32 0900 0000 6030 7660 3 \\
+BIC: POFICHBEXXX \\
+Vermerk: P{\invoicenr}
+}
+
+\end{letter}
+
+\end{document}
+

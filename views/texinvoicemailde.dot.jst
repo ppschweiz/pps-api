@@ -1,0 +1,150 @@
+\documentclass[ppsletter,fontsize=11pt,foldmarks=false ]{scrlttr2}
+\usepackage[margin=10pt,font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{esr}
+
+\makeatletter
+\@setplength{toaddrvpos}{4.5cm}
+\@setplength{toaddrhpos}{12cm}
+\KOMAoptions{foldmarks=off}
+
+% VARIABLES START
+\newcommand{\surname}{{{=it.last_name}}}
+\newcommand{\givenname}{{{=it.first_name}}}
+% Anrede informell? Lieber/Liebe?
+{{? (it.gender_id == 2)}}
+\newcommand{\salut}{Lieber~\givenname}
+{{?? false }}
+\newcommand{\salut}{Liebe~\givenname}
+{{?}}
+\newcommand{\location}{{{=it.city}}}
+\newcommand{\country}{{{=it.country}}}
+\newcommand{\postalcode}{{{=it.postal_code}}}
+\newcommand{\street}{{{=it.street_address}}}
+\newcommand{\amountpps}{{{=it.level1.minimum_fee}}}
+\newcommand{\amountsection}{{{=it.level2.minimum_fee}}}
+\newcommand{\sectionname}{{{=it.level2.membership_name}}}
+\newcommand{\amountsum}{{{=it.minimum_fee}}}
+\newcommand{\reference}{{{=it.esrreference}}}
+\newcommand{\memberid}{{{=it.external_identifier}}}
+\newcommand{\invoicenr}{{{=it.invoicenr}}}
+
+\esrEinzahlungFuer{Postfinance\\3030 Bern}
+\esrZugunstenVon{Piratenpartei Schweiz\\3000 Bern}
+\esrKonto{01-84038-2}
+\esrPrefix{{{=it.esrprefix}}}
+% VARIABLES END
+
+%\setkomavar{memberid}{}
+%\setkomavar{membernick}{}
+%\setkomavar{memberemail}{}
+
+\setkomavar{partei}{Stefan Thöni}
+\setkomavar{departement}{Co-Präsident}
+\setkomavar{fromname}{}
+\setkomavar{fromstreet}{Piratenpartei Schweiz}
+\setkomavar{fromcity}{3000 Bern}
+\setkomavar{fromemail}{finance@piratenpartei.ch}
+\setkomavar{fromurl}{www.piratenpartei.ch}
+\setkomavar{backaddress}{}
+\setkomavar{date}{5.~April~2015}
+
+\setkomavar{subject}{Rechnung {\invoicenr}}
+
+\begin{document}
+ 
+\selectlanguage{ngerman}
+
+\ifstr{\country}{SWITZERLAND}{%
+    \AddToShipoutPicture{\put(0,0){\includegraphics[width=\paperwidth]{orange-pay.png}}
+    }
+    
+    \newcommand{\currency}{CHF}
+}{%
+    \newcommand{\currency}{EUR}
+}
+
+\ifstr{\country}{SWITZERLAND}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{10cm}
+
+\opening{\salut}
+
+Der Mitgliederbetrag setzt sich dieses Jahr wie folgt zusammen:
+% La cotisation annuel 2015 est comme suit:
+
+\ifstr{\sectionname}{\empty}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Mitgliedschaft 2015}    &               & \textbf{Betrag}       \\
+Piratenpartei Schweiz           & \currency     & \amountpps            \\
+\hline
+Total                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+Die Piratenpartei Schweiz dankt Dir für deine Unterstützung!
+% Le Parti Pirate Suisse te remercie pour ton soutien!
+
+}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Mitgliedschaft 2015}    &               & \textbf{Betrag}       \\
+Piratenpartei Schweiz           & \currency     & \amountpps            \\
+%Parti Pirate Suisse & \currency     & \amountpps            \\
+\sectionname                    & \currency     & \amountsection        \\
+\hline
+Total                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+%Ta Section et le Parti Pirate Suisse te remercie pour ton soutien!
+Deine Sektion und die Piratenpartei Schweiz danken Dir für deine Unterstützung!
+
+}
+
+\ifstr{\country}{SWITZERLAND}{%
+
+\esrEinbezahltVon{\givenname~\surname \\ \street \\ \postalcode~\location}
+\expandafter\esrBetrag\expandafter{\amountsum}
+\expandafter\esrReferenznummer\expandafter{\reference}
+\esrPrint
+
+}{%
+
+\vspace{1cm}
+Betrag überweisen an:
+
+Piratenpartei Schweiz \\
+3000 Bern
+
+IBAN: CH32 0900 0000 6030 7660 3 \\
+BIC: POFICHBEXXX
+
+}
+
+\end{letter}
+
+\end{document}
+
