@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var assert     = require('assert');
 var crypto = require('crypto');
 var dots = require("dot").process({path: "./views", templateSettings: {strip: false}});
+var lescape = require('escape-latex');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -46,6 +47,16 @@ function sha1(value) {
 	return shasum.digest('hex');
 }
 
+function recursive_lescape(value) {
+	if (value && value.constructor == String) {
+		value = lescape(value)
+	} else { // array
+		for (var i in value) {
+			value[i] = recursive_lescape(value[i])
+		}
+	}
+	return value;
+}
 
 // Fetch Membership fees and cache them
 var membership_types = {};
@@ -153,6 +164,9 @@ router.route('/letterman/:auth_key/:member_id/:view')
 	.get (function(req, res) {
 		get_member_data(req.params.member_id, function(ret) {
 			var dots_view = dots[req.params.view];
+			if (req.query.format == "latex") {
+				ret = recursive_lescape(ret);
+			}
 			if (dots_view) {
 				var out = dots_view(ret);
 				res.send(out);
