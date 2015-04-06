@@ -9,6 +9,7 @@ var ldap = require('ldapjs');
 var phone = require('node-phonenumber');
 var phoneUtil = phone.PhoneNumberUtil.getInstance();
 var clone = require('clone');
+var async = require('async');
 
 // CiviCRM
 var config = {
@@ -16,6 +17,7 @@ var config = {
   path: process.env.CIVICRM_PATH,
   key: process.env.CIVICRM_SITE_KEY,
   api_key: process.env.CIVICRM_API_KEY,
+  sequential: 0,
 };
 
 var crmAPI = require('civicrm')(config);
@@ -329,43 +331,39 @@ function mergeArray(array1,array2) {
   return array2;
 }
 
-function _crud(object, where, value, values, callback) {
-	values = mergeArray(where, values);
-	// where = merge(values, {}, wheremaps[object]);
-	//console.log('crud: ' + object + "," + JSON.stringify(where) + "," + value + "," + JSON.stringify(values));
-	crmAPI.get (object,where,
+function _get(object, where, values, callback) {
+	var _values = mergeArray(where, values);
+	crmAPI.get (object,values,
 		function (result) {
-  			assert.equal(result.is_error, 0, "CRUD failed for " + object + " " + JSON.stringify(values) + " result:" + JSON.stringify(result));
+  			assert.equal(result.is_error, 0, "CRUD failed for " + object + " " + JSON.stringify(_values) + " result:" + JSON.stringify(result));
 			values.id = result.id;
-			//console.log('_crud found: ' + object + " " + JSON.stringify(result));
-			if (value) { // update or create
-				//console.log('_crud creating: ' + object + " " + values + " " + JSON.stringify(values));
-				crmAPI.create(object, values,
-					function(result) {
-  						assert.equal(result.is_error, 0, "CRUD failed for " + object + " " + JSON.stringify(values) + " result:" + JSON.stringify(result));
-						//console.log('_crud created: ' + object + " " + JSON.stringify(result));
-						if (callback)
-							callback(result.id);
-					});
-			} else if (result.id) {
-				crmAPI.delete(object, {'id': result.id},
-					function(result) {
-  						assert.equal(result.is_error, 0, "CRUD failed for " + object + " " + JSON.stringify(values) + " result:" + JSON.stringify(result));
-						//console.log('_crud deleted: ' + object + " " + JSON.stringify(result));
-					});
-				if (callback)
-					callback(result.id);
-			}
-		}
-	);
+			if (callback)
+				callback(result.id);
+	});
 }
-
 
 function map_to_object(object, entry, variant) {
 	return merge(entry, {}, fieldmaps[object][variant]);
 }
 
-function add_or_update_object(object, entry) {
+function _crud2(object, where, value, values, actionlist) {
+	var _where = mergeArray(where, {});
+	var _values= mergeArray(values, {'options.match': _where});
+	_values = mergeArray(where, _values);
+	var _actions = actionlist
+	if (value) {// update
+		_actions['api.' + object + '.create'] = []
+		_actions['api.' + object + '.create'].push(_values);
+	//} else { //delete (not supported atm)
+	//	_actions['api.' + object + '.get'] = _where;
+	//	_actions['api.' + object + '.delete'] =_values;
+	}
+}
+
+var update_queue = async.queue(function (task, callback) {
+	var object = task.object;
+	var entry = task.entry;
+
         var externalid = entry.uniqueIdentifier;
 	//console.log('entry: ' + JSON.stringify(entry));
 
@@ -375,44 +373,51 @@ function add_or_update_object(object, entry) {
 	// more crunshing
         contact.contact_type = 'Individual';
 
-        contact_id = _crud('Contact', {'external_identifier': externalid}, contact.display_name, contact, function(contact_id) {
+	var civi = {'external_identifier': externalid, 'return': 'external_identifier'};
 
-		console.log("update:"+contact_id);
-		//console.log(contact);
-		// HOME
-		var email_main = map_to_object('Email', entry, 1);
-		_crud('Email', {'contact_id':contact_id, 'location_type_id':1}, email_main.email, email_main);
+	var actionlist = {};
+        contact_id = _crud2('Contact', {'external_identifier': externalid}, contact.display_name, contact, actionlist);
 
-		// OTHER
-		var email_other = map_to_object('Email', entry, 4);
-		_crud('Email', {'contact_id':contact_id, 'location_type_id':4}, email_other.email, email_other);
+	//console.log(contact);
+	// HOME
+	var email_main = map_to_object('Email', entry, 1);
+	_crud2('Email', {'contact_id':contact_id, 'location_type_id':1}, email_main.email, email_main, actionlist);
 
-		var address = map_to_object('Address', entry, 0);
-		address.is_billing = 1
-		address.is_primary = 1
-		_crud('Address', {'contact_id':contact_id, 'location_type_id':1}, address.city, address);
+	// OTHER
+	var email_other = map_to_object('Email', entry, 4);
+	_crud2('Email', {'contact_id':contact_id, 'location_type_id':4}, email_other.email, email_other, actionlist);
 
-		// main phone_type_id=1
-		var main_phone = map_to_object('Phone', entry, 1);
-		_crud('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'1'}, main_phone.phone, main_phone);
+	var address = map_to_object('Address', entry, 0);
+	address.is_billing = 1
+	address.is_primary = 1
+	_crud2('Address', {'contact_id':contact_id, 'location_type_id':1}, address.city, address, actionlist);
 
-		// mobile phone_type_id=2
-		var mobile_phone = map_to_object('Phone', entry, 2);
-		_crud('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'2'}, mobile_phone.phone, mobile_phone);
+	// main phone_type_id=1
+	var main_phone = map_to_object('Phone', entry, 1);
+	_crud2('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'1'}, main_phone.phone, main_phone, actionlist);
 
-		// Add membership definition // PPS
-		var membership = map_to_object('Membership', entry, 0);
-		_crud('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership);
+	// mobile phone_type_id=2
+	var mobile_phone = map_to_object('Phone', entry, 2);
+	_crud2('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'2'}, mobile_phone.phone, mobile_phone, actionlist);
 
-		// Add membership definition // cantonal section
-		var membership = map_to_object('Membership', entry, 1);
-		_crud('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership);
+	// Add membership definition // PPS
+	var membership = map_to_object('Membership', entry, 0);
+	_crud2('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
 
-		// Add membership definition // bezirk section
-		var membership = map_to_object('Membership', entry, 2);
-		_crud('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership);
+	// Add membership definition // cantonal section
+	var membership = map_to_object('Membership', entry, 1);
+	_crud2('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
+
+	// Add membership definition // bezirk section
+	var membership = map_to_object('Membership', entry, 2);
+	_crud2('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
+
+	_get('Contact', {'external_identifier': externalid}, actionlist, function() {
+		// next tasks
+		process.nextTick(callback);
 	});
-}
+
+}, 8);
 
 
 // LDAP
@@ -435,7 +440,9 @@ client.bind(ldap_opts.binddn, ldap_opts.bindpw, function(err) {
 	  assert.ifError(err);
 
 	  res.on('searchEntry', function(entry) {
-		add_or_update_object('Contact', entry.object);
+		update_queue.push({'object':'Contact', 'entry':entry.object}, function() {
+			console.log("done:" + entry.object.uniqueIdentifier);
+		});
 		
 	  });
 	  res.on('searchReference', function(referral) {
