@@ -348,7 +348,7 @@ function map_to_object(object, entry, variant) {
 
 function _crud2(object, where, value, values, actionlist) {
 	var _where = mergeArray(where, {});
-	var _values= mergeArray(values, {'options.match': _where});
+	var _values= mergeArray(values, {'options': {'match': Object.keys(_where)}});
 	_values = mergeArray(where, _values);
 	var _actions = actionlist
 	if (value) {// update
