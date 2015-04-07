@@ -115,6 +115,9 @@ function get_member_data(member_id, callback) {
 				crmAPI.get ('membership',{contact_id: contact.contact_id},
 					function (result) {
 						var total_fee = 0;
+						// set empty for template handling
+						ret.level1 = {description: ""}; ret.level2 = {description: ""}; ret.level3 = {description: ""};
+
 						for (var i in result.values) {
 							var val = result.values[i];
 
@@ -134,7 +137,7 @@ function get_member_data(member_id, callback) {
 						}
 						ret.minimum_fee = total_fee.toFixed(2);
 						// construct invoice number and ESR
-						ret.invoicenr = "14" + pad(ret.external_identifier, 6, 0);
+						ret.invoicenr = "15" + pad(ret.external_identifier, 6, 0);
 						ret.esrreference = ret.invoicenr;
 						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20150";
 						ret.paylink = paylink_base + "pay/" + sha1(paylink_secret + ":pay/" + ret.external_identifier).substring(0,20) + "/" + ret.external_identifier;
