@@ -367,7 +367,8 @@ function _crud2(object, where, value, values, actionlist) {
 	_values = mergeArray(where, _values);
 	var _actions = actionlist
 	if (value) {// update
-		_actions['api.' + object + '.create'] = []
+		if (!('api.' + object + '.create' in _actions))
+			_actions['api.' + object + '.create'] = [];
 		_actions['api.' + object + '.create'].push(_values);
 	//} else { //delete (not supported atm)
 	//	_actions['api.' + object + '.get'] = _where;
