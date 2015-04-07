@@ -1,0 +1,198 @@
+\documentclass[ppsletter,fontsize=11pt,foldmarks=false ]{scrlttr2}
+\usepackage[margin=10pt,font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{esr}
+
+\makeatletter
+\@setplength{toaddrvpos}{4.5cm}
+\@setplength{toaddrhpos}{12cm}
+\KOMAoptions{foldmarks=off}
+
+\setkomavar{memberid}{}
+\setkomavar{membernick}{}
+\setkomavar{memberemail}{}
+
+\setkomavar{partei}{Guillaume Saouli}
+\setkomavar{departement}{Co-Président}
+\setkomavar{fromname}{}
+\setkomavar{fromstreet}{Partito Pirata Svizzera}
+\setkomavar{fromcity}{3000 Berne}
+\setkomavar{fromemail}{info@partitopirata.ch}
+\setkomavar{fromurl}{www.partitopirata.ch}
+\setkomavar{backaddress}{}
+\setkomavar{date}{7~Avril~2015}
+
+\setkomavar{signature}{\includegraphics[width=3cm]{X.png} \\ Guillaume Saouli \\ Co-président \\ Partito Pirata Svizzera}
+
+% VARIABLES START
+\newcommand{\surname}{{{=it.last_name}}}
+\newcommand{\givenname}{{{=it.first_name}}}
+{{? (it.gender_id == 2)}}
+\newcommand{\salut}{Caro~\givenname}
+{{?? false }}
+\newcommand{\salut}{Cara~\givenname}
+{{?}}
+\newcommand{\location}{{{=it.city}}}
+\newcommand{\country}{{{=it.country}}}
+\newcommand{\postalcode}{{{=it.postal_code}}}
+\newcommand{\street}{{{=it.street_address}}}
+\newcommand{\amountpps}{{{=it.level1.minimum_fee}}}
+\newcommand{\amountsection}{{{=it.level2.minimum_fee}}}
+\newcommand{\sectionname}{{{=it.level2.description}}}
+\newcommand{\amountsum}{{{=it.minimum_fee}}}
+\newcommand{\reference}{{{=it.esrreference}}}
+\newcommand{\memberid}{{{=it.external_identifier}}}
+\newcommand{\invoicenr}{{{=it.invoicenr}}}
+
+\esrEinzahlungFuer{Postfinance\\3030 Bern}
+\esrZugunstenVon{Partito Pirata Svizzera\\3000 Bern}
+\esrKonto{01-84038-2}
+\esrPrefix{{{=it.esrprefix}}}
+% VARIABLES END
+
+\setkomavar{subject}{Quota 2015}
+
+\begin{document}
+ 
+\selectlanguage{italian}
+
+\ifstr{\country}{Schweiz}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{2cm}
+
+\opening{\salut}
+
+Il 2015 è un anno cruciale! Il Partito Pirata e le sue sezioni si stanno preparando per affrontare diverse e importanti sfide:
+\begin{itemize}
+\item Le elezioni federali
+\item Il referendum sulla Legge sul Servizio Informazioni (LSI)
+\item Il referendum sulla Legge federale sulla sorveglianza della corrispondenza postale e del traffico delle telecomunicazioni (LSCPT)
+\end{itemize}
+
+Abbiamo delle reali possibilità di entrare per la prima volta nel Consiglio Nazionale, ma per far questo il Partito Pirata ha bisogno del tuo sostegno! Impegnarsi in prima persona e contribuire per permettere alle squadre di lavorare a più non posso è necessario per concretizzare dei risultati positivi nelle guerre che combattiamo.  
+
+Le idee che porta avanti il Partito sono sempre più attuali: la protezione dei dati personali, della propria sfera privata e della propria integrità digitale:
+\begin{itemize}
+\item La Legge sul Servizio Informazioni e i metodi che invadono le comunicazioni, i computer e la propria spfera privata sono assolutamente sproporzionati, al punto da considerare le riserve sulla LSCPT persino inadeguate!
+\item La Legge federale sulla sorveglianza della corrispondenza postale e del traffico delle telecomunicazioni, che vorrebbe immagazzinare tutti i metadati che ci riguardano in giganti database infiltrandosi con dei trojan nei computer e negli smartphone.
+\end{itemize}
+
+I rischi ormai li conosciamo. In tutti i paesi in cui si è tentato questo approccio, gli USA ma anche la Francia, abbiamo asistito a censure e abusi. E’ inaccettabile che i cittadini diventino dei potenziali sospettati solo perché la tecnologia permette di accumulare dati all’insaputa di tutti!
+L’altro grande tema è cosa ne sarà di Internet e della neutralità della rete. Il Consiglio Nazionale ha fatto cadere tutto nel dimenticatoio, cosa che lascia terreno fertile per l’avvento di un Internet a due velocità in cui solo i più ricchi potranno beneficiare delle prestazioni migliori.
+
+I mezzi necessari per le elezioni federali sono costosi ma sfortunatamente indispensabili per avere successo! Per rispondere a tutte le richieste, assicurare la logistica fondamentale per l’amministrazione e permettere al Partito di focalizzarsi sulla politica, vogliamo prendere un’assistente amministrativa. Questo ci consentirà di concentrarci sulla politica, lo sviluppo della presenza nei media, la partecipazione alle consultazioni e alle petizioni.
+
+Per difendere i valori e le idee Pirata, il tuo sostegno , la tua partecipazione e i tuo contributo sono fondamentali!
+
+\closing{Grazie in anticipo,}
+
+\end{letter}
+
+\newpage
+
+\setkomavar{subject}{Fattura {\invoicenr}}
+\setkomavar{fromemail}{finance@partitopirata.ch}
+
+\ifstr{\country}{Schweiz}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{10cm}
+
+\opening{\salut}
+
+\ifstr{\country}{Schweiz}{%
+ \newcommand{\currency}{CHF}
+}{%
+ \newcommand{\currency}{EUR}
+}
+
+Di seguito troverai le informazioni sulla quota annuale:
+
+\ifstr{\sectionname}{\empty}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Quota 2015}          &               & \textbf{Ammontare}       \\
+Partito Pirata Svizzera             & \currency     & \amountpps            \\
+\hline
+Totale                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+Il Partito Pirata Svizzero ti ringrazia per il sostegno!
+
+}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Quota 2015}          &               & \textbf{Ammontare}       \\
+Partito Pirata Svizzera             & \currency     & \amountpps            \\
+\sectionname                    & \currency     & \amountsection        \\
+\hline
+Totale                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+La tua Sezione e il Partito Pirata Svizzero ti ringraziano per il sostegno!
+
+}
+
+\ifstr{\country}{Schweiz}{%
+
+\esrEinbezahltVon{\givenname~\surname \\ \street \\ \postalcode~\location}
+\expandafter\esrBetrag\expandafter{\amountsum}
+\expandafter\esrReferenznummer\expandafter{\reference}
+\esrPrint
+
+}{%
+
+\vspace{1cm}
+L'ammontare deve essere versato a:
+
+Partito Pirata Svizzera \\
+3000 Berne
+
+IBAN: CH32 0900 0000 6030 7660 3 \\
+BIC: POFICHBEXXX \\
+Note: P{\invoicenr}
+}
+
+\end{letter}
+
+\end{document}

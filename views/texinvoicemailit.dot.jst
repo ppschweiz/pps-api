@@ -12,11 +12,10 @@
 % VARIABLES START
 \newcommand{\surname}{{{=it.last_name}}}
 \newcommand{\givenname}{{{=it.first_name}}}
-% Anrede informell? Lieber/Liebe?
 {{? (it.gender_id == 2)}}
-\newcommand{\salut}{Lieber~\givenname}
+\newcommand{\salut}{Caro~\givenname}
 {{?? false }}
-\newcommand{\salut}{Liebe~\givenname}
+\newcommand{\salut}{Cara~\givenname}
 {{?}}
 \newcommand{\location}{{{=it.city}}}
 \newcommand{\country}{{{=it.country}}}
@@ -31,30 +30,30 @@
 \newcommand{\invoicenr}{{{=it.invoicenr}}}
 
 \esrEinzahlungFuer{Postfinance\\3030 Bern}
-\esrZugunstenVon{Piratenpartei Schweiz\\3000 Bern}
+\esrZugunstenVon{Partito Pirata Svizzera\\3000 Bern}
 \esrKonto{01-84038-2}
 \esrPrefix{{{=it.esrprefix}}}
 % VARIABLES END
 
-%\setkomavar{memberid}{}
-%\setkomavar{membernick}{}
-%\setkomavar{memberemail}{}
+\setkomavar{memberid}{}
+\setkomavar{membernick}{}
+\setkomavar{memberemail}{}
 
-\setkomavar{partei}{Stefan Thöni}
-\setkomavar{departement}{Co-Präsident}
+\setkomavar{partei}{Guillaume Saouli}
+\setkomavar{departement}{Co-Président}
 \setkomavar{fromname}{}
-\setkomavar{fromstreet}{Piratenpartei Schweiz}
-\setkomavar{fromcity}{3000 Bern}
-\setkomavar{fromemail}{finance@piratenpartei.ch}
-\setkomavar{fromurl}{www.piratenpartei.ch}
+\setkomavar{fromstreet}{Partito Pirata Svizzera}
+\setkomavar{fromcity}{3000 Berne}
+\setkomavar{fromemail}{finance@partitopirata.ch}
+\setkomavar{fromurl}{www.partitopirata.ch}
 \setkomavar{backaddress}{}
-\setkomavar{date}{7.~April~2015}
+\setkomavar{date}{7~Avril~2015}
 
-\setkomavar{subject}{Rechnung {\invoicenr}}
+\setkomavar{subject}{Cotisation {\invoicenr}}
 
 \begin{document}
  
-\selectlanguage{ngerman}
+\selectlanguage{italian}
 
 \ifstr{\country}{Schweiz}{%
     \AddToShipoutPicture{\put(0,0){\includegraphics[width=\paperwidth]{orange-pay.png}}
@@ -89,34 +88,34 @@
 
 \opening{\salut}
 
-Der Mitgliederbetrag setzt sich dieses Jahr wie folgt zusammen:
+La cotisation annuelle 2015 est comme suit:
 
 \ifstr{\sectionname}{\empty}{%
 
 \begin{tabular}{ l l r }
 \hspace{8cm}                    &               &                       \\
-\textbf{Mitgliedschaft 2015}    &               & \textbf{Betrag}       \\
-Piratenpartei Schweiz           & \currency     & \amountpps            \\
+\textbf{Cotisation 2015}          &               & \textbf{Montant}       \\
+Partito Pirata Svizzera             & \currency     & \amountpps            \\
 \hline
 Total                           & \currency     & \amountsum            \\
 \end{tabular}
 
 \vspace{0.5cm}
-Die Piratenpartei Schweiz dankt Dir für deine Unterstützung!
+Le Parti Pirate Suisse te remercie pour ton soutien!
 
 }{%
 
 \begin{tabular}{ l l r }
 \hspace{8cm}                    &               &                       \\
-\textbf{Mitgliedschaft 2015}    &               & \textbf{Betrag}       \\
-Piratenpartei Schweiz           & \currency     & \amountpps            \\
+\textbf{Cotisation 2015}          &               & \textbf{Montant}       \\
+Partito Pirata Svizzera             & \currency     & \amountpps            \\
 \sectionname                    & \currency     & \amountsection        \\
 \hline
 Total                           & \currency     & \amountsum            \\
 \end{tabular}
 
 \vspace{0.5cm}
-Deine Sektion und die Piratenpartei Schweiz danken Dir für deine Unterstützung!
+Ta Section et le Parti Pirate Suisse te remercie pour ton soutien!
 
 }
 
@@ -130,17 +129,16 @@ Deine Sektion und die Piratenpartei Schweiz danken Dir für deine Unterstützung
 }{%
 
 \vspace{1cm}
-Betrag überweisen an:
+Montant doit être versé à:
 
-Piratenpartei Schweiz \\
-3000 Bern
+Parti Pirate Suisse \\
+3000 Berne
 
 IBAN: CH32 0900 0000 6030 7660 3 \\
 BIC: POFICHBEXXX \\
-Vermerk: P{\invoicenr}
+Note: P{\invoicenr}
 }
 
 \end{letter}
 
 \end{document}
-
