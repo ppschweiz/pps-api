@@ -388,6 +388,7 @@ var update_queue = async.queue(function (task, callback) {
 
 	// more crunshing
         contact.contact_type = 'Individual';
+        contact.communication_style_id = 2; //Familiar
 
 	var actionlist = {};
         _crud1('Contact', {'external_identifier': externalid}, contact.display_name, contact, actionlist);
