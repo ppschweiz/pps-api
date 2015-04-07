@@ -331,9 +331,9 @@ function mergeArray(array1,array2) {
   return array2;
 }
 
-function _get(object, where, values, callback) {
+function _create(object, where, values, callback) {
 	var _values = mergeArray(where, values);
-	crmAPI.get (object,values,
+	crmAPI.create (object,values,
 		function (result) {
   			assert.equal(result.is_error, 0, "CRUD failed for " + object + " " + JSON.stringify(_values) + " result:" + JSON.stringify(result));
 			values.id = result.id;
@@ -346,8 +346,23 @@ function map_to_object(object, entry, variant) {
 	return merge(entry, {}, fieldmaps[object][variant]);
 }
 
-function _crud2(object, where, value, values, actionlist) {
+function _crud1(object, where, value, values, actionlist) {
 	var _where = mergeArray(where, {});
+	var _values= mergeArray(values, {'options': {'match': Object.keys(_where)[0]}});
+	_values = mergeArray(where, _values);
+	var _actions = actionlist
+	if (value) {// update
+		_actions = mergeArray(_values, _actions);
+	//} else { //delete (not supported atm)
+	}
+}
+
+function _crud2(object, where, value, values, actionlist) {
+	var _where = mergeArray(where, {'contact_id':''});
+	if (_where.membership_type) { //HACK, need _id for matching
+		_where.membership_type_id = _where.membership_type;
+		delete _where.membership_type;
+	}
 	var _values= mergeArray(values, {'options': {'match': Object.keys(_where)}});
 	_values = mergeArray(where, _values);
 	var _actions = actionlist
@@ -373,46 +388,44 @@ var update_queue = async.queue(function (task, callback) {
 	// more crunshing
         contact.contact_type = 'Individual';
 
-	var civi = {'external_identifier': externalid, 'return': 'external_identifier'};
-
 	var actionlist = {};
-        contact_id = _crud2('Contact', {'external_identifier': externalid}, contact.display_name, contact, actionlist);
+        _crud1('Contact', {'external_identifier': externalid}, contact.display_name, contact, actionlist);
 
 	//console.log(contact);
 	// HOME
 	var email_main = map_to_object('Email', entry, 1);
-	_crud2('Email', {'contact_id':contact_id, 'location_type_id':1}, email_main.email, email_main, actionlist);
+	_crud2('Email', {'location_type_id':1}, email_main.email, email_main, actionlist);
 
 	// OTHER
 	var email_other = map_to_object('Email', entry, 4);
-	_crud2('Email', {'contact_id':contact_id, 'location_type_id':4}, email_other.email, email_other, actionlist);
+	_crud2('Email', {'location_type_id':4}, email_other.email, email_other, actionlist);
 
 	var address = map_to_object('Address', entry, 0);
 	address.is_billing = 1
 	address.is_primary = 1
-	_crud2('Address', {'contact_id':contact_id, 'location_type_id':1}, address.city, address, actionlist);
+	_crud2('Address', {'location_type_id':1}, address.city, address, actionlist);
 
 	// main phone_type_id=1
 	var main_phone = map_to_object('Phone', entry, 1);
-	_crud2('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'1'}, main_phone.phone, main_phone, actionlist);
+	_crud2('Phone', {'location_type_id': 1, 'phone_type_id':'1'}, main_phone.phone, main_phone, actionlist);
 
 	// mobile phone_type_id=2
 	var mobile_phone = map_to_object('Phone', entry, 2);
-	_crud2('Phone', {'contact_id':contact_id, 'location_type_id': 1, 'phone_type_id':'2'}, mobile_phone.phone, mobile_phone, actionlist);
+	_crud2('Phone', {'location_type_id': 1, 'phone_type_id':'2'}, mobile_phone.phone, mobile_phone, actionlist);
 
 	// Add membership definition // PPS
 	var membership = map_to_object('Membership', entry, 0);
-	_crud2('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
+	_crud2('Membership', {'membership_type': membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
 
 	// Add membership definition // cantonal section
 	var membership = map_to_object('Membership', entry, 1);
-	_crud2('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
+	_crud2('Membership', {membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
 
 	// Add membership definition // bezirk section
 	var membership = map_to_object('Membership', entry, 2);
-	_crud2('Membership', {'contact_id':contact_id, membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
+	_crud2('Membership', {membership_type: membership.membership_type}, membership.membership_type && entry.ppsJoining, membership, actionlist);
 
-	_get('Contact', {'external_identifier': externalid}, actionlist, function() {
+	_create('Contact', {'external_identifier': externalid}, actionlist, function() {
 		// next tasks
 		process.nextTick(callback);
 	});
