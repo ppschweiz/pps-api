@@ -201,10 +201,10 @@ router.route('/paylink/:auth_key/:member_id')
 			var member_id = req.params.member_id;
 			var amount = member.minimum_fee;
 			var ret = {};
-			ret.member = member;
 			ret.amount = amount;
 			ret.first_name = member.first_name;
 			ret.last_name = member.last_name;
+			ret.member_id = member_id;
 			ret.bitpay = {'enabled': 1};
 			ret.stripe = {'enabled': 1};
 			ret.bitpay.paylink = api_base + "/pay-bitpay/" + sha1(paylink_secret + ":pay-bitpay/" + member_id).substring(0,20) + "/" + member_id;
