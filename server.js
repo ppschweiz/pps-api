@@ -29,6 +29,12 @@ var config = {
 
 var crmAPI = require('civicrm')(config);
 
+// BitPay
+var bitpay = require('bitpay');
+var bitpay_privkey    = process.env.BITPAY_PRIVKEY;
+
+// Stripe
+var stripe =  require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // secrets to protect API
 var secrets = process.env.PPSAPI_SECRETS.split(',');
@@ -37,8 +43,15 @@ var secrets = process.env.PPSAPI_SECRETS.split(',');
 // e.g. http://localhost:8080/members/hash/blabla would result in
 // sha1(secret:members/blabla).substring(0,20) only half of the hash is used
 
-var paylink_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch/";
+var paylink_base =  process.env.PPSAPI_PAYLINKURL || "https://api.test.piratenpartei.ch";
 var paylink_secret = process.env.PPSAPI_PAYSECRET;
+
+var api_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch/api/v1";
+
+var api_secret = undefined;
+require('crypto').randomBytes(48, function(ex, buf) {
+  var api_secret = buf.toString('hex');
+});
 
 function sha1(value) {
 	var shasum = crypto.createHash('sha1');
@@ -140,7 +153,7 @@ function get_member_data(member_id, callback) {
 						ret.invoicenr = "15" + pad(ret.external_identifier, 6, 0);
 						ret.esrreference = ret.invoicenr;
 						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20150";
-						ret.paylink = paylink_base + "pay/" + sha1(paylink_secret + ":pay/" + ret.external_identifier).substring(0,20) + "/" + ret.external_identifier;
+						ret.paylink = paylink_base + "/pay/" + sha1(paylink_secret + ":pay/" + ret.external_identifier).substring(0,20) + "/" + ret.external_identifier;
 						if (callback)
 							callback(ret);
 					}
@@ -179,9 +192,103 @@ router.route('/letterman/:auth_key/:member_id/:view')
 		});
 	});
 
+// paylink
+router.route('/paylink/:auth_key/:member_id')
+	.get (function(req, res) {
+		console.log(JSON.stringify(req.body));
+		get_member_data(req.params.member_id, function(member) {
+			var member_id = req.params.member_id;
+			var amount = member.minimum_fee;
+			var ret = {};
+			ret.member = member;
+			ret.amount = amount;
+			ret.first_name = member.first_name;
+			ret.last_name = member.last_name;
+			ret.bitpay = {'enabled': 1};
+			ret.stripe = {'enabled': 1};
+			ret.bitpay.paylink = api_base + "/pay-bitpay/" + sha1(paylink_secret + ":pay-bitpay/" + member_id).substring(0,20) + "/" + member_id;
+			ret.stripe.paylink = api_base + "/pay-stripe/" + sha1(paylink_secret + ":pay-stripe/" + member_id).substring(0,20) + "/" + member_id;
+			res.jsonp( ret );
+		});
+	});
+
+// paylink - bitpay
+router.route('/pay-bitpay/:auth_key/:member_id')
+	.get (function(req, res) {
+		console.log(JSON.stringify(req.body));
+		get_member_data(req.params.member_id, function(member) {
+			var member_id = req.params.member_id;
+			var amount = member.minimum_fee;
+			var ret = {'status': 'failed', url: paylink_base + "/pay-fail"};
+			// not used yet, need unique order_id first to prevent replays
+			var posDataBody = JSON.stringify({member_id: member_id, order_id: -1});
+			var posDataHash = sha1(paylink_secret + ":" + posDataBody);
+			var data = {
+			  price: amount,
+			  currency: 'CHF',
+			  notificationURL: api_base + '/bitpay/ipn',
+			  posData: {body: posDataBody, hash: posDataHash},
+			  redirectURL: paylink_base + "/pay-done",
+			};
+			console.log(JSON.stringify(data));
+			//var client = bitpay.createClient(bitpay_privkey, {config: {"apiHost": "test.bitpay.com", "apiPort": 443}});
+			var client = bitpay.createClient(bitpay_privkey, {config: {"apiHost": "bitpay.com", "apiPort": 443}});
+			client.on('error', function(err) {
+				console.log(err);
+				//res.jsonp( ret );
+			});
+
+			client.on('ready', function() {
+			  client.as('pos').post('invoices', data, function(err, invoice) {
+				console.log(err || invoice);
+				if (err)  {
+			  		res.redirect (paylink_base + "/pay-fail");
+				} else {
+					ret.status = "success";
+					ret.url = invoice.url;
+					ret.invoice = invoice;
+			  		res.redirect (invoice.url);
+				}
+				//res.jsonp( ret );
+			  });
+			});
+		});
+	});
+
+// paylink - stripe
+router.route('/pay-stripe/:auth_key/:member_id')
+	.post (function(req, res) {
+		console.log(JSON.stringify(req.body));
+		get_member_data(req.params.member_id, function(member) {
+			console.log(req.body);
+			var stripe_token = req.body.stripeToken;
+			var stripe_email = req.body.stripeEmail;
+			var member_id = req.params.member_id;
+			var amount = member.minimum_fee;
+			var ret = {'status': 'failed'};
+
+			// create charge using stripe module
+			stripe.charges.create({
+			  amount: amount * 100,
+			  currency: "chf",
+			  source: stripe_token,
+			  description: "Mitgliederbeitrag 2015 - " + member_id,
+			  receipt_email: stripe_email,
+			}).then(function(charge) {
+			  console.log("Charge created");
+			  console.log(charge);
+			  res.redirect (paylink_base + "/pay-done");
+			}, function(err) {
+			  console.log(err);
+			  res.redirect (paylink_base + "/pay-fail");
+			});
+		});
+	});
+
 // Bitpay IPN
 router.route('/bitpay/ipn')
 	.post (function(req, res) {
+		// just log don't care
 		console.log(JSON.stringify(req.body));
 		res.send("OK"); // make bitpay happy for now
 	});
