@@ -157,7 +157,7 @@ function get_member_data(member_id, callback) {
 router.route('/member/:auth_key/:member_id')
 	.get (function(req, res) {
 		get_member_data(req.params.member_id, function(ret) {
-			res.json( ret );
+			res.jsonp( ret );
 		});
 	}
 );
