@@ -7,6 +7,7 @@ ENV PPSAPI_BASEURL http://api.local.piratenpartei.ch/api/v1
 ENV PPSAPI_PAYLINKURL http://pay.local.piratenpartei.ch
 
 ENV BITPAY_PRIVKEY secret
+ENV BITPAY_MODE test
 ENV STRIPE_SECRET_KEY secret
 
 ENV CIVICRM_SERVER http://wordpress.local.piratenpartei.ch

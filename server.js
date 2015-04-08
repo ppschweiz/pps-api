@@ -33,6 +33,11 @@ var crmAPI = require('civicrm')(config);
 // BitPay
 var bitpay = require('bitpay');
 var bitpay_privkey    = process.env.BITPAY_PRIVKEY;
+var bitpay_mode       = process.env.BITPAY_MODE;
+var bitpay_config = {
+		'prod': {config: {"apiHost": "bitpay.com", "apiPort": 443}},
+		'test': {config: {"apiHost": "test.bitpay.com", "apiPort": 443}},
+		};
 
 // Stripe
 var stripe =  require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -232,11 +237,11 @@ router.route('/pay-bitpay/:auth_key/:member_id')
 			  redirectURL: paylink_base + "/pay-done",
 			};
 			console.log(JSON.stringify(data));
-			//var client = bitpay.createClient(bitpay_privkey, {config: {"apiHost": "test.bitpay.com", "apiPort": 443}});
-			var client = bitpay.createClient(bitpay_privkey, {config: {"apiHost": "bitpay.com", "apiPort": 443}});
+			var client = bitpay.createClient(bitpay_privkey, bitpay_config[bitpay_mode]);
 			client.on('error', function(err) {
 				console.log(err);
 				//res.jsonp( ret );
+				res.redirect (paylink_base + "/pay-fail");
 			});
 
 			client.on('ready', function() {
