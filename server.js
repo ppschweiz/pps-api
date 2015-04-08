@@ -141,9 +141,10 @@ function get_member_data(member_id, callback) {
 							total_fee = total_fee + parseInt(val.minimum_fee);
 
 							// TODO, this is a hackish selection of section levels (PPS, PPXX and PPCITYNAME)
-							if(val.membership_name.length == 3)
+							var basename = val.membership_name.split('-')[0]; //remove variants "-Reduced" ...
+							if(basename.length == 3)
 								ret.level1 = val
-							else if(val.membership_name.length == 4)
+							else if(basename.length == 4)
 								ret.level2 = val
 							else
 								ret.level3 = val
