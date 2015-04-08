@@ -11,6 +11,7 @@ var assert     = require('assert');
 var crypto = require('crypto');
 var dots = require("dot").process({path: "./views", templateSettings: {strip: false}});
 var lescape = require('escape-latex');
+var crypto = require('crypto');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -37,7 +38,10 @@ var bitpay_privkey    = process.env.BITPAY_PRIVKEY;
 var stripe =  require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // secrets to protect API
+var api_secret = crypto.randomBytes(10).toString('hex'); // random secret used for internal links
 var secrets = process.env.PPSAPI_SECRETS.split(',');
+secrets.push(api_secret);
+
 // to access the API, the following hash needs to be generated
 // sha1(secret + ":" + f1 + "/" + leftover).substring(0,20)
 // e.g. http://localhost:8080/members/hash/blabla would result in
@@ -48,10 +52,6 @@ var paylink_secret = process.env.PPSAPI_PAYSECRET;
 
 var api_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch/api/v1";
 
-var api_secret = undefined;
-require('crypto').randomBytes(48, function(ex, buf) {
-  var api_secret = buf.toString('hex');
-});
 
 function sha1(value) {
 	var shasum = crypto.createHash('sha1');
@@ -207,8 +207,8 @@ router.route('/paylink/:auth_key/:member_id')
 			ret.member_id = member_id;
 			ret.bitpay = {'enabled': 1};
 			ret.stripe = {'enabled': 1};
-			ret.bitpay.paylink = api_base + "/pay-bitpay/" + sha1(paylink_secret + ":pay-bitpay/" + member_id).substring(0,20) + "/" + member_id;
-			ret.stripe.paylink = api_base + "/pay-stripe/" + sha1(paylink_secret + ":pay-stripe/" + member_id).substring(0,20) + "/" + member_id;
+			ret.bitpay.paylink = api_base + "/pay-bitpay/" + sha1(api_secret + ":pay-bitpay/" + member_id).substring(0,20) + "/" + member_id;
+			ret.stripe.paylink = api_base + "/pay-stripe/" + sha1(api_secret + ":pay-stripe/" + member_id).substring(0,20) + "/" + member_id;
 			res.jsonp( ret );
 		});
 	});
