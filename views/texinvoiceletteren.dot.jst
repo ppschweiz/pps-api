@@ -1,0 +1,200 @@
+\documentclass[ppsletter,fontsize=11pt,foldmarks=false ]{scrlttr2}
+\usepackage[margin=10pt,font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{esr}
+
+\makeatletter
+\@setplength{toaddrvpos}{4.5cm}
+\@setplength{toaddrhpos}{12cm}
+\KOMAoptions{foldmarks=off}
+
+\setkomavar{memberid}{}
+\setkomavar{membernick}{}
+\setkomavar{memberemail}{}
+
+\setkomavar{partei}{Guillaume Saouli}
+\setkomavar{departement}{Co-President}
+\setkomavar{fromname}{}
+\setkomavar{fromstreet}{Pirate Party Switzerland}
+\setkomavar{fromcity}{3000 Bern}
+\setkomavar{fromemail}{info@pirateparty.ch}
+\setkomavar{fromurl}{www.pirateparty.ch}
+\setkomavar{backaddress}{}
+\setkomavar{date}{April~15~2015}
+
+\setkomavar{signature}{\includegraphics[width=3cm]{X.png} \\ Guillaume Saouli \\ Co-president \\ Pirate Party Switzerland}
+
+% VARIABLES START
+\newcommand{\surname}{{{=it.last_name}}}
+\newcommand{\givenname}{{{=it.first_name}}}
+{{? (it.gender_id == 2)}}
+\newcommand{\salut}{Cher~\givenname}
+{{?? false }}
+\newcommand{\salut}{Chère~\givenname}
+{{?}}
+\newcommand{\location}{{{=it.city}}}
+\newcommand{\country}{{{=it.country}}}
+\newcommand{\postalcode}{{{=it.postal_code}}}
+\newcommand{\street}{{{=it.street_address}}}
+\newcommand{\amountpps}{{{=it.level1.minimum_fee}}}
+\newcommand{\amountsection}{{{=it.level2.minimum_fee}}}
+\newcommand{\sectionname}{{{=it.level2.description}}}
+\newcommand{\amountsum}{{{=it.minimum_fee}}}
+\newcommand{\reference}{{{=it.esrreference}}}
+\newcommand{\memberid}{{{=it.external_identifier}}}
+\newcommand{\invoicenr}{{{=it.invoicenr}}}
+
+\esrEinzahlungFuer{Postfinance\\3030 Bern}
+\esrZugunstenVon{Pirate Party Switzerland\\3000 Bern}
+\esrKonto{01-84038-2}
+\esrPrefix{{{=it.esrprefix}}}
+% VARIABLES END
+
+\setkomavar{subject}{Membership Fee 2015}
+
+\begin{document}
+ 
+\selectlanguage{english}
+
+\ifstr{\country}{Schweiz}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{2cm}
+
+\opening{\salut}
+2015 is a year full of challenges! The Pirate Party and its sections have to face multiples key battles:
+\begin{itemize}
+\item Federal elections
+\item Referendum against the Intelligence Act
+\item Referendum against the  Postal Service and Telecommunications Surveillance Act
+\end{itemize}
+
+We sport real chances to enter the National Council; however to achieve this goal, the Party needs your support and contribution!
+You are welcome to contribute and engage with the hard working teams, which seek to reach positive and decisive results.
+
+Never as before, the ideas and values defended by the party were more actual and current, the protection of the individual, its privacy, and the integrity of its digital being, which are targeted by laws such as:
+
+\begin{itemize}
+\item Intelligence Act and the disproportionately intrusive methods used to assault everyone's private sphere through the interception of communications, computers hacks, all the while the administration considers that the PSTSA is an inadequate framework for the surveillance of the swiss population.
+\item The Postal Service and Telecommunications Surveillance Act (PSTSA) , which seeks  to store all metadata about us in giant databases, while planting Trojans on all computers, smartphones.
+\end{itemize}
+
+The risks are known. In each country which was tempted by this approach, the United States or France, there censorship and abuse were observed. It is unacceptable that all citizens are, at all time,  potential suspects because today the  technology allows for an abusive accumulation of data without anyone's knowledge!
+The other major theme is the future of the Internet, net neutrality, the  National Council abruptly returned the subject to oblivion, leaving the  way open for the advent of a two-speed Internet where only the wealthy will benefit from the best services.
+
+The means to run a federal elections campaign are costly, but unfortunately unavoidable to be successful! To further improve upon the management and the administration of the party, a strong logistic infrastructure is needed. In order to achive this goal,  the party will hire an administative assistant in order to be able to focus with serenity on its goals, do politics (policy work, consultations, lobbying and petitions) and represent you, as well as provide you a unique way to interact with the party and the Swiss political world.
+
+To uphold the values and pirate ideas, your support, your participation and your contribution are deerly needed!
+
+\closing{Thank you in advance,}
+
+\end{letter}
+
+\newpage
+
+\setkomavar{subject}{Invoice {\invoicenr}}
+\setkomavar{fromemail}{finance@partipirate.ch}
+
+\ifstr{\country}{Schweiz}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	~
+}
+
+}{%
+
+\begin{letter}{%
+	\givenname~\surname\\
+	\street\\
+	\postalcode~\location\\
+	\country
+}
+
+}
+
+\enlargethispage{10cm}
+
+\opening{\salut}
+
+\ifstr{\country}{Schweiz}{%
+ \newcommand{\currency}{CHF}
+}{%
+ \newcommand{\currency}{EUR}
+}
+
+The membership fee for 2015 is:
+
+\ifstr{\sectionname}{\empty}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Membership Fee 2015}          &               & \textbf{Amount}       \\
+Pirate Party Switzerland             & \currency     & \amountpps            \\
+\hline
+Total                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+The Swiss Pirate Party thanks you for your support!
+
+}{%
+
+\begin{tabular}{ l l r }
+\hspace{8cm}                    &               &                       \\
+\textbf{Membership Fee 2015}          &               & \textbf{Amount}       \\
+Pirate Party Switzerland             & \currency     & \amountpps            \\
+\sectionname                    & \currency     & \amountsection        \\
+\hline
+Total                           & \currency     & \amountsum            \\
+\end{tabular}
+
+\vspace{0.5cm}
+Your section and the Swiss Pirate Party thank you for your support!
+
+}
+
+\ifstr{\country}{Schweiz}{%
+
+\esrEinbezahltVon{\givenname~\surname \\ \street \\ \postalcode~\location}
+\expandafter\esrBetrag\expandafter{\amountsum}
+\expandafter\esrReferenznummer\expandafter{\reference}
+\esrPrint
+
+}{%
+
+\vspace{1cm}
+Please wire the amoun to the following account:
+
+Pirate Party Switzerland \\
+3000 Berne
+
+IBAN: CH32 0900 0000 6030 7660 3 \\
+BIC: POFICHBEXXX \\
+Note: P{\invoicenr}
+}
+
+\end{letter}
+
+\end{document}
+
