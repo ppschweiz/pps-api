@@ -216,7 +216,7 @@ fieldmap_email_alternate_person = {
 }
 
 fieldmap_membership_person = {
-	'ppsJoining': {
+	'ppsJoining': [{
 		key: 'join_date',
 		transform: function(value, objFrom, objTo) {
 			if (value && value.constructor == Array)
@@ -229,7 +229,33 @@ fieldmap_membership_person = {
 		default: function(objFrom, objTo) {
 			return undefined;
 		},
-	},
+	},{
+		key: 'start_date', // write end_date=start_date=join_date to prevent unpaid membership from becoming active
+		transform: function(value, objFrom, objTo) {
+			if (value && value.constructor == Array)
+				return value[0].substring(0,8)
+			else if (value)
+				return value.substring(0,8)
+			else
+				return undefined;
+		},
+		default: function(objFrom, objTo) {
+			return undefined;
+		},
+	},{
+		key: 'end_date', // write end_date=start_date=join_date to prevent unpaid membership from becoming active
+		transform: function(value, objFrom, objTo) {
+			if (value && value.constructor == Array)
+				return value[0].substring(0,8)
+			else if (value)
+				return value.substring(0,8)
+			else
+				return undefined;
+		},
+		default: function(objFrom, objTo) {
+			return undefined;
+		},
+	}],
 	'ppsLeaving': {
 		key: 'end_date',
 		transform: function(value, objFrom, objTo) {
