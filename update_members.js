@@ -128,6 +128,10 @@ fieldmap_contact_person = {
 			return undefined;
 		},
 	},
+	'ppsJoining': 'custom_1', //'pps_joining',
+	'ppsLeaving': 'custom_2', //'pps_leaving',
+	'employeeType': 'custom_3', //'pps_employee_type',
+	'dn': 'custom_4', //pps_dn
 };
 
 fieldmap_address_person = {
