@@ -245,6 +245,8 @@ fieldmap_membership_person = {
 	},{
 		key: 'end_date', // write end_date=start_date=join_date to prevent unpaid membership from becoming active
 		transform: function(value, objFrom, objTo) {
+			if (objFrom.ppsLeaving) // abort, if no longer member
+				return undefined;
 			if (value && value.constructor == Array)
 				return value[0].substring(0,8)
 			else if (value)
@@ -277,7 +279,7 @@ fieldmap_membership_person = {
 				objTo.is_override = 1;
 				return "Expelled"; // CiviCRM custom - expelled
 			} else if (value == 3) {// Veteran=3, no longer member
-				//objTo.is_override = 1;
+				objTo.is_override = 1;
 				return "Cancelled"; // CiviCRM - Cancelled
 			} else
 				return undefined; // let CiviCRM do its magic
