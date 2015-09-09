@@ -12,6 +12,7 @@ var crypto = require('crypto');
 var dots = require("dot").process({path: "./views", templateSettings: {strip: false}});
 var lescape = require('escape-latex');
 var crypto = require('crypto');
+var merge = require('object-mapper').merge;
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -57,6 +58,47 @@ var paylink_secret = process.env.PPSAPI_PAYSECRET;
 
 var api_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch/api/v1";
 
+
+map_preferred_language = {'de': 'de_CH', 'fr': 'fr_FR', 'en': 'en_GB', 'it': 'it_IT'}
+map_gender = {'male': '1', 'female': '2'};
+
+fieldmap_new_member = {
+        'uniqueIdentifier': 'external_identifier',
+	'username': {
+		key: 'nick_name',
+	},
+	'language': {
+		key: 'preferred_language',
+		transform: function(value, objFrom, objTo) {
+			return map_preferred_language[value];
+		},
+		default: function(objFrom, objTo) {
+			return "de_CH";
+		},
+	},
+        'section': {
+		key: 'custom5',
+	},
+	'gender': {
+		key: 'gender_id',
+		transform: function(value, objFrom, objTo) {
+			return map_gender[value];
+		},
+	},
+	'surname': {
+		key: 'last_name',
+	},
+	'givenname': {
+		key: 'first_name',
+	},
+	'birthdate': {
+		key: 'birth_date',
+	},
+};
+
+function map_new_member(entry) {
+        return merge(entry, {}, fieldmap_new_member);
+}
 
 function sha1(value) {
 	var shasum = crypto.createHash('sha1');
@@ -171,6 +213,26 @@ function get_member_data(member_id, callback) {
 		}
 	);
 }
+
+function new_member(args, res) {
+	args.contact_type = 'Individual';
+
+	crmAPI.create ('contact',args, function (result) {
+		res(result);
+	});
+}
+
+// more routes for our API will happen here
+router.route('/admin/:auth_key/:action')
+	.post (function(req, res) {
+		if (req.params.action == 'newmember')
+			console.log(req.body);
+			console.log(map_new_member(req.body));
+			new_member(map_new_member(req.body), function(ret) {
+				res.jsonp( ret );
+			});
+        }
+);
 
 // more routes for our API will happen here
 router.route('/member/:auth_key/:member_id')
