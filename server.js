@@ -18,6 +18,7 @@ var merge = require('object-mapper').merge;
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser());
 
 var port = process.env.PORT || 80;        // set our port
 
@@ -93,6 +94,27 @@ fieldmap_new_member = {
 	},
 	'birthdate': {
 		key: 'birth_date',
+	},
+	'country': {
+		key: 'country',
+	},
+	'state': {
+		key: 'state_province',
+	},
+	'street': {
+		key: 'street_address',
+	},
+	'location': {
+		key: 'city',
+	},
+	'postalcode': {
+		key: 'postal_code',
+	},
+	'phone': {
+		key: 'phone',
+	},
+	'email': {
+		key: 'email',
 	},
 };
 
@@ -216,9 +238,15 @@ function get_member_data(member_id, callback) {
 
 function new_member(args, res) {
 	args.contact_type = 'Individual';
+	args["api.EntityTag.create"] = '{"tag_id": 6}';
 
 	crmAPI.create ('contact',args, function (result) {
-		res(result);
+		console.log(result);
+		if (result.is_error == 0) {
+			res.jsonp({"status":"success"});
+		} else {
+			res.status(403)
+		}
 	});
 }
 
@@ -226,11 +254,10 @@ function new_member(args, res) {
 router.route('/admin/:auth_key/:action')
 	.post (function(req, res) {
 		if (req.params.action == 'newmember')
+			console.log(req.params);
 			console.log(req.body);
 			console.log(map_new_member(req.body));
-			new_member(map_new_member(req.body), function(ret) {
-				res.jsonp( ret );
-			});
+			new_member(map_new_member(req.body), res);
         }
 );
 
