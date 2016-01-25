@@ -8,11 +8,13 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var assert     = require('assert');
-var crypto = require('crypto');
-var dots = require("dot").process({path: "./views", templateSettings: {strip: false}});
-var lescape = require('escape-latex');
-var crypto = require('crypto');
-var merge = require('object-mapper').merge;
+var crypto     = require('crypto');
+var dots       = require("dot").process({path: "./views", templateSettings: {strip: false}});
+var lescape    = require('escape-latex');
+var crypto     = require('crypto');
+var merge      = require('object-mapper').merge;
+var fs         = require('fs');
+var invoicer   = require('./invoicer');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -63,7 +65,7 @@ var api_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch
 map_preferred_language = {'de': 'de_CH', 'fr': 'fr_FR', 'en': 'en_GB', 'it': 'it_IT'}
 map_gender = {'male': '1', 'female': '2'};
 
-fieldmap_new_member = {
+fieldmap_new_member_contact = {
         'uniqueIdentifier': 'external_identifier',
 	'username': {
 		key: 'nick_name',
@@ -95,6 +97,15 @@ fieldmap_new_member = {
 	'birthdate': {
 		key: 'birth_date',
 	},
+	'phone': {
+		key: 'phone',
+	},
+	'email': {
+		key: 'email',
+	},
+};
+
+fieldmap_new_member_address = {
 	'country': {
 		key: 'country',
 	},
@@ -109,12 +120,6 @@ fieldmap_new_member = {
 	},
 	'postalcode': {
 		key: 'postal_code',
-	},
-	'phone': {
-		key: 'phone',
-	},
-	'email': {
-		key: 'email',
 	},
 };
 
@@ -198,7 +203,9 @@ function get_member_data(member_id, callback) {
 					function (result) {
 						var total_fee = 0;
 						// set empty for template handling
-						ret.level1 = {description: ""}; ret.level2 = {description: ""}; ret.level3 = {description: ""};
+						ret.level1 = {description: ""};
+						ret.level2 = {description: ""};
+						ret.level3 = {description: ""};
 
 						for (var i in result.values) {
 							var val = result.values[i];
@@ -269,6 +276,35 @@ router.route('/member/:auth_key/:member_id')
 		});
 	}
 );
+
+// Invoid PDF API
+router.route('/invoicepdf/:auth_key/:member_id/invoice.pdf')
+	.get (function(req, res) {
+		console.log('invoicepdf');
+		fs.exists("/data/pdf/" + req.params.member_id + ".pdf", function(exists) {
+			if (exists) {
+				console.log("pdf exists");
+				fs.readFile("/data/pdf/" + req.params.member_id + ".pdf", null, function (err,data) {
+					if (err) {
+						res.send(err);
+					} else {
+						res.send(data);
+					}
+				});
+			} else {
+				console.log("creating pdf");
+				invoicer.create_pdf(req.params.member_id, function() {
+					fs.readFile("/data/pdf/" + req.params.member_id + ".pdf", null, function (err,data) {
+						if (err) {
+							res.send(err);
+						} else {
+							res.send(data);
+						}
+					});
+				});
+			}
+		});
+	});
 
 // Letterman API
 router.route('/letterman/:auth_key/:member_id/:view')
