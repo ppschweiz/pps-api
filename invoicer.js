@@ -38,15 +38,45 @@ function sha1(value) {
 	return shasum.digest('hex');
 }
 
-var map_communication_method = {2:'email', 1:'snailmail'};
-var map_language = {'de_CH': 'de', 'fr_FR': 'fr', 'en_GB': 'en', 'it_IT': 'it'};
+var map_language = {
+	'de_CH': 'de',
+	'de_DE': 'de',
+	'de_AT': 'de',
+	'de_BE': 'de',
+	'de_LI': 'de',
+	'de_LU': 'de',
+	'de': 'de',
+	'fr_FR': 'fr',
+	'fr_BE': 'fr',
+	'fr_CA': 'fr',
+	'fr_LU': 'fr', 
+	'en_GB': 'en',
+	'en_US': 'en',
+	'en_AU': 'en',
+	'en_CA': 'en',
+	'en_NZ': 'en', 
+	'it_IT': 'it',
+	'it_CH': 'it'
+};
 
-var map_template = {
-    'email': {'de': 'texinvoicemailde', fr: 'texinvoicemailfr', it:'texinvoicemailit',  en:'texinvoicemailen'},
-'snailmail': {'de': 'texinvoiceletterde', fr: 'texinvoiceletterfr', it:'texinvoiceletterit',  en:'texinvoiceletteren'},
- 'mailtext': {'de': 'mailtextde', fr: 'mailtextfr', it:'mailtextit',  en:'mailtexten'},
- 'mailhtml': {'de': 'mailhtmlde', fr: 'mailhtmlfr', it:'mailhtmlit',  en:'mailhtmlen'},
-	};
+function get_language(lang) {
+	if (lang) {
+		if (map_language[lang]) {
+			return map_language[lang];
+		} else {
+			return 'en';
+		}
+	} else {
+		return 'en';
+	}
+}
+
+var map_invoice = {
+	'de': 'texinvoicemailde',
+	'fr': 'texinvoicemailfr',
+	'it':'texinvoicemailit',
+	'en':'texinvoicemailen'
+};
 
 var map_subject = {
 	'de': 'Mitgliederbeitrag 2015',
@@ -103,16 +133,8 @@ function get_membership(member_id, callback) {
 					console.log("invoicer get_membership membership");
 					var membership = membership_result.values[0];
 					var lang = contact.preferred_language;
-					if (!lang) {
-						console.log("unknown language " + contact.preferred_language);
-						lang = 'de';
-					}
-					var communication_method = map_communication_method[contact.preferred_communication_method];
 					console.log(contact.external_identifier + " " + contact.first_name + " " + contact.last_name);
-					console.log(communication_method);
-					console.log(lang);
-  					var template = map_template[communication_method][map_language[lang]];
-					console.log(template);
+  					var template = map_invoice[get_language(lang)];
 					var compile_job = {
     "compile": {
         "options": {

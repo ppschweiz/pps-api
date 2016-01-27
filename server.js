@@ -61,7 +61,6 @@ var paylink_secret = process.env.PPSAPI_PAYSECRET;
 
 var api_base =  process.env.PPSAPI_BASEURL || "https://api.test.piratenpartei.ch/api/v1";
 
-
 map_preferred_language = {'de': 'de_CH', 'fr': 'fr_FR', 'en': 'en_GB', 'it': 'it_IT'}
 map_gender = {'male': '1', 'female': '2'};
 
