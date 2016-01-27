@@ -170,7 +170,7 @@ function get_membership(member_id, callback) {
 					var out_path = "/data/pdf/";
 					var out_file = member_id + ".pdf";
 					console.log("invoicer get_membership pre pdf qeueu");
-					pdf_queue.push({project_base: project_base, compile_job: compile_job, out_path: out_path, out_file: out_file, communication_method: communication_method, lang: lang}, function (err) {
+					pdf_queue.push({project_base: project_base, compile_job: compile_job, out_path: out_path, out_file: out_file, lang: lang}, function (err) {
 						console.log("finished " + member_id);
 						callback();
 					},function () {
