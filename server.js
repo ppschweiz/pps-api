@@ -226,9 +226,9 @@ function get_member_data(member_id, callback) {
 						}
 						ret.minimum_fee = total_fee.toFixed(2);
 						// construct invoice number and ESR
-						ret.invoicenr = "15" + pad(ret.external_identifier, 6, 0);
+						ret.invoicenr = "16" + pad(ret.external_identifier, 6, 0);
 						ret.esrreference = ret.invoicenr;
-						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20150";
+						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20160";
 						ret.paylink = paylink_base + "/pay/" + sha1(paylink_secret + ":pay/" + ret.external_identifier).substring(0,20) + "/" + ret.external_identifier;
 						if (callback)
 							callback(ret);
