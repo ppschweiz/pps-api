@@ -15,6 +15,7 @@ var crypto     = require('crypto');
 var merge      = require('object-mapper').merge;
 var fs         = require('fs');
 var invoicer   = require('./invoicer');
+var groups     = require('./groups');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -32,7 +33,7 @@ var config = {
   api_key: process.env.CIVICRM_API_KEY,
 };
 
-var crmAPI = require('civicrm')(config);
+var crmAPI = require('./civicrm')(config);
 
 // BitPay
 var bitpay = require('bitpay');
@@ -155,6 +156,21 @@ crmAPI.get ('MembershipType',{is_active: 1, return:'name,minimum_fee,description
 	}
 );
 
+function contains(list, item) {
+        for (var i in list) {
+                if (list[i] == item)
+                        return true;
+        }
+
+        return false;
+}
+
+const NEWSLETTER_POLITICS_ID = "7";
+const NEWSLETTER_ACTIONS_ID = "8";
+const NEWSLETTER_EVENTS_ID = "9";
+const NEWSLETTER_ASSEMBLIES_ID = "10";
+const NEWSLETTER_VOTINGS_ID = "11";
+
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -259,11 +275,39 @@ function new_member(args, res) {
 // more routes for our API will happen here
 router.route('/admin/:auth_key/:action')
 	.post (function(req, res) {
-		if (req.params.action == 'newmember')
-			console.log(req.params);
-			console.log(req.body);
-			console.log(map_new_member(req.body));
-			new_member(map_new_member(req.body), res);
+		switch (req.params.action) {
+			case "newmember":
+				console.log(req.params);
+				console.log(req.body);
+				console.log(map_new_member(req.body));
+				//new_member(map_new_member(req.body), res);
+				break;
+			case "setnewsletter":
+				var email = req.body.email;
+				var newsletters = [];
+				var regions = [];
+
+				if ('newsletter' in req.body) {
+					for (i in req.body.newsletter) {
+						newsletters.push(req.body.newsletter[i]);
+					}
+				}
+			
+				if ('region' in req.body) {
+					for (i in req.body.region) {
+						regions.push(req.body.region[i]);
+					}
+				}
+
+				res.send("update complete");
+
+				groups.update_newsletter(crmAPI, email, regions, newsletters);
+				break;
+			default:
+				console.log("unknown admin command");
+				break;
+		}
+		
         }
 );
 
@@ -276,7 +320,7 @@ router.route('/member/:auth_key/:member_id')
 	}
 );
 
-// Invoid PDF API
+// Invoice PDF API
 router.route('/invoicepdf/:auth_key/:member_id/invoice.pdf')
 	.get (function(req, res) {
 		console.log('invoicepdf');
