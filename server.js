@@ -258,6 +258,17 @@ function get_member_data(member_id, callback) {
 	);
 }
 
+function update_language(email, language) {
+	crmAPI.get('contact', { 'email': email },
+        	function(contact_result) {
+                	contact = contact_result.values[0];
+
+			crmAPI.update('contact', { 'id': contact.id, 'preferred_language': language },
+        			function(set_result) {
+        			});
+        	});
+}
+
 function new_member(args, res) {
 	args.contact_type = 'Individual';
 	args["api.EntityTag.create"] = '{"tag_id": 6}';
@@ -284,6 +295,7 @@ router.route('/admin/:auth_key/:action')
 				break;
 			case "setnewsletter":
 				var email = req.body.email;
+				var language = req.body.language;
 				var newsletters = [];
 				var regions = [];
 
@@ -300,6 +312,8 @@ router.route('/admin/:auth_key/:action')
 				}
 
 				res.send("update complete");
+
+				update_language(email, language);
 
 				groups.update_newsletter(crmAPI, email, regions, newsletters);
 				break;
