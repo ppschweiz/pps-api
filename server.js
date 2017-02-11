@@ -244,7 +244,7 @@ function get_member_data(member_id, callback) {
 						// construct invoice number and ESR
 						ret.invoicenr = "16" + pad(ret.external_identifier, 6, 0);
 						ret.esrreference = ret.invoicenr;
-						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20160";
+						ret.esrprefix = "01" + "00000" + pad(ret.external_identifier, 5, 0) + "20170";
 						ret.paylink = paylink_base + "/pay/" + sha1(paylink_secret + ":pay/" + ret.external_identifier).substring(0,20) + "/" + ret.external_identifier;
 						if (callback)
 							callback(ret);
@@ -460,7 +460,7 @@ router.route('/pay-stripe/:auth_key/:member_id')
 			  amount: amount * 100,
 			  currency: "chf",
 			  source: stripe_token,
-			  description: "Mitgliederbeitrag 2016 - " + member_id,
+			  description: "Mitgliederbeitrag 2017 - " + member_id,
 			  receipt_email: stripe_email,
 			}).then(function(charge) {
 			  console.log("Charge created");
