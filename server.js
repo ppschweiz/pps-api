@@ -416,6 +416,7 @@ router.route('/pay-bitpay/:auth_key/:member_id')
 			  currency: 'CHF',
 			  notificationURL: api_base + '/bitpay/ipn',
 			  posData: JSON.stringify({body: posDataBody, hash: posDataHash}),
+		          buyer: {name: member_id},
 			  redirectURL: paylink_base + "/pay-done",
 			};
 			console.log(JSON.stringify(data));
