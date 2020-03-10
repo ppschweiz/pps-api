@@ -461,7 +461,7 @@ router.route('/pay-stripe/:auth_key/:member_id')
 			  amount: amount * 100,
 			  currency: "chf",
 			  source: stripe_token,
-			  description: "Mitgliederbeitrag - " + member_id,
+			  description: "Mitgliederbeitrag 2020 " + member_id,
 			  receipt_email: stripe_email,
 			}).then(function(charge) {
 			  console.log("Charge created");
