@@ -1,4 +1,4 @@
-FROM node:5.3-onbuild
+FROM node:5-onbuild
 
 # Overwrite these with actual passwords,keys and URLs
 ENV PPSAPI_SECRETS abcdef,ghijkl
