@@ -15,7 +15,7 @@
     "fs": "0.0.2",
     "ldapjs": "^0.7.1",
     "mailcomposer": "^0.2.12",
-    "mongoose": "~3.8.39",
+    "mongoose": "~5.9.5",
     "node-phonenumber": "^0.2.1",
     "object-mapper": "^2.2.5",
     "request": "^2.88.0",
