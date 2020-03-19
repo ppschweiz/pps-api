@@ -1,19 +1,10 @@
-// call the packages we need
-var assert     = require('assert');
-var crypto = require('crypto');
-var request = require('request');
-var async   = require('async');
-var fs      = require('fs');
-
 function contains(list, item) {
-        for (var i in list) {
-                if (list[i] == item)
-                        return true;
-        }
-
-        return false;
+	for (var i in list) {
+		if (list[i] == item)
+			return true;
+	}
+	return false;
 }
-
 
 const GROUP_PPS_SYMPATHIZERS_ID = "33";
 const GROUP_PPBB_SYMPATHIZERS_ID = "34";
@@ -82,14 +73,13 @@ function update_groups(crmAPI, contact, groups) {
 
 			for (var i in groups) {
 				var group_id = groups[i];
-						
+
 				if (is_relevant_group(group_id) && !contains(current, group_id)) {
 					crmAPI.create('group_contact', { 'contact_id': contact.id, 'group_id': group_id, 'status': 'Added' },
 						function(create_result) {
 						});
 				}
 			}
-					
 		});
 }
 
@@ -101,24 +91,23 @@ function update_groups_or_create(crmAPI, email, groups) {
 				update_groups(crmAPI, contact, groups);
 			} else {
 				crmAPI.create('contact', { 'email': 'hostmaster@savvy.ch', 'contact_type': 'Individual' },
-				        function(create_result) {
+					function(create_result) {
 						contact = create_result.values[0];
 						update_groups(crmAPI, contact, groups);
-        				});
+					});
 			}
 		});
 }
 
-function update_newsletter(crmAPI, email, regions, newsletters)
-{
+function update_newsletter(crmAPI, email, regions, newsletters) {
 	var groups = [];
 
-        for (var i in regions) {
-		if (is_relevant_group(regions[i])) { 
+	for (var i in regions) {
+		if (is_relevant_group(regions[i])) {
 			groups.push(regions[i]);
 		}
 	}
-        
+
 	for (var i in no_newsletter_groups) {
 		if (!contains(newsletters, no_newsletter_groups[i])) {
 			groups.push(no_newsletter_groups[i]);
@@ -146,4 +135,3 @@ module.exports = {
 	GROUP_PPTI_SYMPATHIZERS_ID,
 	update_newsletter
 }
-
