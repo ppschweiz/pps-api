@@ -15,11 +15,4 @@ ENV CIVICRM_PATH /wp-content/plugins/civicrm/civicrm/extern/rest.php/extern/rest
 ENV CIVICRM_SITE_KEY secret
 ENV CIVICRM_API_KEY secret
 
-ENV LDAP_BINDDN cn=admin,dc=piratenpartei,dc=ch
-ENV LDAP_BINDPW root
-ENV LDAP_BASEDN dc=piratenpartei,dc=ch
-ENV LDAP_FILTER (uniqueIdentifier=*)
-#ENV LDAP_PORT_389_TCP_ADDR ldap
-#ENV LDAP_PORT_389_TCP_PORT 389
-
 EXPOSE 80

@@ -1,11 +1,10 @@
 // update-member.js
-// synchronize LDAP MDB to CiviCRM
+// synchronize MDB to CiviCRM
 // by philipp@hug.cx
 
 // call the packages we need
 var assert = require('assert');
 var merge = require('object-mapper').merge;
-var ldap = require('ldapjs');
 var phone = require('node-phonenumber');
 var phoneUtil = phone.PhoneNumberUtil.getInstance();
 var clone = require('clone');
@@ -21,14 +20,6 @@ var config = {
 };
 
 var crmAPI = require('civicrm')(config);
-
-var ldap_opts = {
-  binddn: process.env.LDAP_BINDDN,
-  bindpw: process.env.LDAP_BINDPW,
-  basedn: process.env.LDAP_BASEDN,
-  filter: process.env.LDAP_FILTER,
-  url: 'ldap://' + process.env.LDAP_PORT_389_TCP_ADDR + ':' + process.env.LDAP_PORT_389_TCP_PORT,
-};
 
 function prettyPhone(value) {
 	if (value) try {
@@ -465,43 +456,3 @@ var update_queue = async.queue(function (task, callback) {
 	});
 
 }, 8);
-
-
-// LDAP
-var client = ldap.createClient({
-  url: ldap_opts.url,
-  bindDN: ldap_opts.binddn,
-  bindCredentials: ldap_opts.bindpw,
-  maxConnections: 5,
-});
-
-client.bind(ldap_opts.binddn, ldap_opts.bindpw, function(err) {
-	assert.ifError(err);
-
-	var opts = {
-	  filter: ldap_opts.filter,
-	  scope: 'sub'
-	};
-
-	client.search(ldap_opts.basedn, opts, function(err, res) {
-	  assert.ifError(err);
-
-	  res.on('searchEntry', function(entry) {
-		update_queue.push({'object':'Contact', 'entry':entry.object}, function() {
-			console.log("done:" + entry.object.uniqueIdentifier);
-		});
-		
-	  });
-	  res.on('searchReference', function(referral) {
-	  	console.log('referral: ' + referral.uris.join());
-	  });
-	  res.on('error', function(err) {
-	  	assert.ifError(err);
-	  });
-	  res.on('end', function(result) {
-	  	console.log('status: ' + result.status);
-		client.unbind();
-	  });
-	});
-});
-
